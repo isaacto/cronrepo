@@ -1,0 +1,3 @@
+[report]
+
+omit=cronrepo/__main__.py
