@@ -14,7 +14,7 @@ def main() -> None:
     calf.call(cronrepo_main)
 
 
-SKIPPED_ENVVAR = set(['COLORTERM', 'SSH_AGENT_PID', 'SSH_AUTH_SOCK'])
+SKIPPED_ENVVAR = set(['COLORTERM', 'SSH_AGENT_PID', 'SSH_AUTH_SOCK', '_'])
 
 
 def cronrepo_main(action: str, crondir: str, *, target: str = '',
@@ -143,7 +143,7 @@ def _create_runner(crondir: str, target: str, trampoline: str) -> None:
         for key, value in sorted(os.environ.items()):
             if key in SKIPPED_ENVVAR:
                 continue
-            print(key + '=' + shlex.quote(value), file=fout)
+            print('export ' + key + '=' + shlex.quote(value), file=fout)
         print('cd ' + shlex.quote(os.getcwd()), file=fout)
         if trampoline:
             trampoline = trampoline + ' '
