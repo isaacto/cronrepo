@@ -10,6 +10,7 @@ calf = "*"
 pytest = "*"
 pytest-cov = "*"
 pylint = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.5"
