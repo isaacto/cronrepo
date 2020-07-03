@@ -82,11 +82,11 @@ def test_crondir_runner(sample_crondir: str) -> None:
     assert '\nexport CRONREPO_TARGET=' in content
     assert '\nexport CRONREPO_JID=' in content
     assert '\nshift 2\n' in content
-    assert '\n"$@"\n' in content
+    assert '\nexec "$@"\n' in content
     crondir.create_runner('do_setup')
     with open(crondir.runner_path()) as fin:
         content = fin.read()
-    assert '\ndo_setup "$@"\n' in content
+    assert '\nexec do_setup "$@"\n' in content
 
 
 def test_crondir_stripped_crontab(

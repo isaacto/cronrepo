@@ -186,7 +186,7 @@ class CronDir:
             if trampoline:
                 trampoline = trampoline + ' '
             print('export CRONREPO_TARGET=$1\nexport CRONREPO_JID=$2\nshift 2\n'
-                  + trampoline + '"$@"', file=fout)
+                  + 'exec ' + trampoline + '"$@"', file=fout)
         os.chmod(runner, 0o700)
 
     def uninstall(self) -> None:
