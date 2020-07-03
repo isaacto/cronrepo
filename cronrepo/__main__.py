@@ -39,7 +39,7 @@ def cronrepo_main(action: str, crondir: str, *, target: str = '',
             the cron job and do the appropriate logging.
 
     """
-    crondir = cronrepo.CronDir(os.path.realpath(crondir, target))
+    crondir = cronrepo.CronDir(os.path.realpath(crondir), target)
     if action == 'generate':
         print(crondir.generate(), end='')
     elif action == 'install':
