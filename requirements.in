@@ -1,0 +1,7 @@
+calf
+pytest
+pytest-cov
+pylint
+pytest-mock
+twine
+wheel
