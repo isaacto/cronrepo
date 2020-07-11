@@ -3,9 +3,9 @@
 In Unix conventions, periodic tasks are invoked by cron jobs.  These
 jobs are normally configured by the user interactively.  When building
 a complex system that contains code that needs to be executed
-periodically, one usually needs to configure related cron jobs and to
-ensure that they are installed exactly at the moment when the
-repository gets deployed.  This gets cumbersome and error-prone.
+periodically, one usually needs to configure many related cron jobs
+and to ensure that they are installed exactly at the moment when the
+repository gets deployed.  This is cumbersome and error-prone.
 
 The cronrepo system eases that pain.
 
@@ -13,9 +13,10 @@ The cronrepo system eases that pain.
 
 A directory should be created for the cron job files.  They are
 normally shell scripts, although you can use other type of programs as
-well.  They need to be line-based, though allowing a comment style
-headed by "#".  So using Perl or Python scripts or even Makefile as
-such jobs are okay.
+well.  They need to be line-based, and need to allow a comment style
+headed by "#" (or otherwise allowing such lines to be inserted freely,
+e.g., through a multi-line string syntax).  So using Perl or Python
+scripts or even Makefile as such jobs are okay.
 
 The cron job files will be tagged by "taglines" to tell what cron jobs
 should be installed on each target.  The simplest ones look like this:
@@ -31,7 +32,7 @@ criteria is matched:
   * month: any month
   * day of week: 2 (Tuesday) and 4 (Thursday)
 
-So it is a job which runs 5 times on the first Tuesday and first
+So it is a job which is invoked 5 times on the first Tuesday and first
 Thursday of every month, at 05:02, 05:04, 05:06, 05:08 and 05:10.
 
 Not all cron time formats are supported, and the above demonstrated
@@ -46,20 +47,24 @@ Multiple taglines may be created for the same target.  It is at times
 handy to be able to differentiate them.  We can add a "job ID" to the
 above line, like this:
 
-    # CRON@alice%second::11-20/2 05 01-07 * 2,4 + foo bar
+    # CRON@alice%second:5:11-20/2 05 01-07 * 2,4 + foo bar
 
 The job ID consists of word characters (letters, digits and
 underscores).  The job ID is set as the environment variable
 CRONREPO_JID.
 
-The above job shows one more feature of the tagline: we can add
-parameters to the cron job, by adding it to the tagline after a "+"
-character.  The above job will be executed with two arguments "foo"
-and "bar".
+The above job shows two more features of the tagline:
+
+  * We can put an integer between the double-colon to give a level
+    number to the job.  The default level is 0.  This is useful in the
+    show-inv command described below.
+  * We can add parameters to the cron job, by adding it to the tagline
+    after a "+" character.  The above job will be executed with two
+    arguments "foo" and "bar".
 
 # The cronrepo program
 
-The cronrepo program manage the cron jobs given a directory of cron
+The cronrepo program manages the cron jobs given a directory of cron
 job files.  This is done by the followings:
 
   * Generation and installation
@@ -80,6 +85,17 @@ job files.  This is done by the followings:
     This undos the modification to your crontab, thus uninstalling the
     cron job.  It also uninstalls the cron runner file generated
     during installation.
+
+  * Listing invocations
+
+        # cronrepo list-inv <dir> --target <target> --minlevel <level> \
+              --start <dt> --end <dt>
+
+    This lists the expected invocations of the cron job entries that
+    occur between the specified `<dt>` (datetime, in
+    'YYYY-mm-ddTHH:MM'), inclusive.  Jobs are listed only if it has a
+    level of at least `<level>`.  The output is in a format that you
+    can save and run in the shell.
 
 # The cron runner
 
@@ -106,5 +122,6 @@ failures is not a good idea.
 You can write a program to actually run your cron jobs, and have the
 runner file to run that instead of the cron job.  This is done by
 adding `--trampoline "your_program"` when you run `cronrepo install`.
-The arguments to your program is simply the path to the cron job file,
-as well as all the arguments to be passed to your job.
+The arguments to `your_program` is simply the path to the cron job
+file, followed by all the arguments to be passed to your job (as
+specified in `+ ...` in the cron job file).

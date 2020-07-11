@@ -1,4 +1,5 @@
 calf
+croniter
 pytest
 pytest-cov
 pylint

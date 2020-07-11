@@ -14,7 +14,8 @@ setuptools.setup(
     url='https://github.com/isaacto/cronrepo',
     packages=setuptools.find_packages(),
     install_requires=[
-        'calf'
+        'calf',
+        'croniter',
     ],
     entry_points={
         "console_scripts": [

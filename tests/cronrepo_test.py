@@ -1,5 +1,6 @@
 # pylint: disable=missing-docstring
 
+import datetime
 import os
 import subprocess
 import tempfile
@@ -18,7 +19,7 @@ def test_cron_spec() -> None:
 # This is a test
 
 # CRON@t1::02 18 * * 1-5
-# CRON@t2%j1::04 17 * * 1 + foo bar
+# CRON@t2%j1:-1:04 17 * * 1 + foo bar
 # CRON@t2%j2::03 17 * * 1 + foo bar
 
         ''', file=fout)
@@ -27,8 +28,10 @@ def test_cron_spec() -> None:
         assert len(specs) == 3
         specs = sorted(specs, key=lambda spec: spec.sort_key())
         assert specs[0].name() == 'cronrepo_test_tmp'
+        assert specs[0].level() == 0
         assert specs[1].name() == 'cronrepo_test_tmp%j2'
         assert specs[2].name() == 'cronrepo_test_tmp%j1'
+        assert specs[2].level() == -1
         assert specs[0].cron_line('runner') == \
             '02 18 * * 1-5 runner t1 \'\' cronrepo_test_tmp'
         specs = list(cronrepo.CronSpec.find_cron_specs(tmp_filename, 't1'))
@@ -144,3 +147,13 @@ def test_crondir_uninstall(
     crondir.stripped_crontab.return_value = '# hello\n'
     crondir.uninstall()
     cronrepo.install_crontab.assert_called_once_with('# hello\n')
+
+
+def test_crondir_list_inv(sample_crondir: str) -> None:
+    crondir = cronrepo.CronDir(sample_crondir, 't1')
+    invs = list(crondir.list_inv(datetime.datetime(2020, 7, 10),
+                                 datetime.datetime(2020, 7, 13), 0))
+    assert len(invs) == 1
+    assert invs[0].pr_str('runner') == f'''
+# date=2020-07-10 time=18:02 name=foo jid= level=0
+runner t1 '' {sample_crondir}/foo'''.lstrip('\n')

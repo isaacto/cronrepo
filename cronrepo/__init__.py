@@ -1,11 +1,15 @@
 "Maintain a set of cron jobs in the code repository"
 
 import collections
+import datetime
+import heapq
 import os
 import re
 import shlex
 import subprocess
 import typing
+
+import croniter
 
 
 class CronSpec:
@@ -30,7 +34,7 @@ class CronSpec:
         ^\#\s*
         CRON@(?P<target>\w*)
         (?:%(?P<jid>\w+))?
-        ::
+        :(?P<level>(?:[+-]?[0-9]+)?):
         (?P<min> [-,*/\d]+)\s+
         (?P<hr> [-,*/\d]+)\s+
         (?P<day> [-,*/\d]+)\s+
@@ -102,19 +106,52 @@ class CronSpec:
                 line.
 
         """
+        return f'{self.cron_fmt()} {self.cmd_str(runner)}'
+
+    def cron_fmt(self) -> str:
+        "Get the time format in the cron line"
         info = self.cron_info
-        args = info['args'].strip()
         return ' '.join([
             info['min'],
             info['hr'],
             info['day'],
             info['mon'],
             info['dow'],
+        ])
+
+    def cmd_str(self, runner: str) -> str:
+        """Return the command string
+
+        Args:
+            runner: The path to the runner script
+
+        """
+        info = self.cron_info
+        args = info['args'].strip()
+        return ' '.join([
             runner,
             info['target'],
             '\'%s\'' % info['jid'],
             self.path,
         ] + ([args] if args else []))
+
+    def gen_inv(self, start: datetime.datetime, iid: int) \
+            -> typing.Iterator['CronInv']:
+        """Generate invocation objects
+
+        Args:
+            start: The starting time for generation
+            iid: The invocation ID of the invocations to generate
+
+        """
+        itr = croniter.croniter(self.cron_fmt(), start)
+        while True:
+            idt = itr.get_next(ret_type=datetime.datetime)
+            yield CronInv(idt, iid, self)
+
+    def level(self) -> int:
+        "Get level number of the cron job"
+        return int(self.cron_info['level'] or '0')
 
 
 GrpKeyType = typing.Tuple[int, str]
@@ -135,13 +172,19 @@ class CronDir:
         self._path = path
         self._target = target
 
-    def generate(self) -> str:
-        cron_lst = []  # type: typing.List[CronSpec]
+    def get_cron_lst(self) -> typing.List[CronSpec]:
+        "Get a list of CronSpec for the cron directory"
+        ret = []  # type: typing.List[CronSpec]
         for name in os.listdir(self._path):
             path = os.path.join(self._path, name)
             if not name.startswith('.') and not name.endswith('~') \
                and not name.endswith('.bak') and os.path.isfile(path):
-                cron_lst.extend(CronSpec.find_cron_specs(path, self._target))
+                ret.extend(CronSpec.find_cron_specs(path, self._target))
+        return ret
+
+    def generate(self) -> str:
+        "Generate crontab for the cron jobs specified in the cron directory"
+        cron_lst = self.get_cron_lst()
         is_multi = set(',-/*').intersection
         grouped = collections.defaultdict(list)  # type: GrpMapType
         for spec in sorted(cron_lst, key=lambda spec: spec.sort_key()):
@@ -166,6 +209,13 @@ class CronDir:
         return '\n'.join(ret)
 
     def install(self, trampoline: str) -> None:
+        """Install the cron jobs specified in the cron directory
+
+        Args:
+            trampoline: The program to use to invoke the jobs.  If empty,
+                use no trampoline
+
+        """
         lines = self.generate()
         cron_tab = self.stripped_crontab()
         if not cron_tab.endswith('\n'):
@@ -175,6 +225,13 @@ class CronDir:
         install_crontab(cron_tab)
 
     def create_runner(self, trampoline: str) -> None:
+        """Create the runner file to run the cron job
+
+        Args:
+            trampoline: The program to use to invoke the jobs.  If empty,
+                use no trampoline
+
+        """
         runner = self.runner_path()
         with open(runner, 'wt') as fout:
             print('#!/bin/bash', file=fout)
@@ -190,12 +247,33 @@ class CronDir:
         os.chmod(runner, 0o700)
 
     def uninstall(self) -> None:
+        "Uninstall previously installed cron jobs"
         cron_tab = self.stripped_crontab()
         try:
             os.remove(self.runner_path())
         except FileNotFoundError:
             pass
         install_crontab(cron_tab)
+
+    def list_inv(self, start: datetime.datetime, end: datetime.datetime,
+                 min_level: int) -> typing.Iterator['CronInv']:
+        """List invocations of cron jobs in the cron directory
+
+        Args:
+            start: The start time to list
+            end: The end time to list.  Invocations exactly at end time is
+                also listed
+            min_level: The minimum level of jobs to be listed
+
+        """
+        cron_lst = [spec for spec in self.get_cron_lst()
+                    if spec.level() >= min_level]
+        iters = [spec.gen_inv(start, iid)
+                 for iid, spec in enumerate(cron_lst)]
+        for cron_inv in heapq.merge(*iters, key=CronInv.key):
+            if cron_inv.dt > end:
+                break
+            yield cron_inv
 
     def runner_path(self) -> str:
         "Return the location of runner"
@@ -235,5 +313,40 @@ class CronDir:
 
 
 def install_crontab(cron_tab: str) -> None:
-    "Install a string as crontab"
+    """Install a string as crontab
+
+    Args:
+        cron_tab: The string to install
+
+    """
     subprocess.run(['crontab', '-'], input=cron_tab.encode(), check=True)
+
+
+class CronInv:
+    """Represent an invocation of a cron job to be shown
+
+    Args:
+
+        dt: The datetime of the invocation
+        iid: The invocation ID, to be used for sorting
+        cron_spec: The CronSpec of the invocation
+
+    """
+    def __init__(self, dt: datetime.datetime, iid: int,
+                 cron_spec: CronSpec) -> None:
+        self.dt = dt
+        self.iid = iid
+        self.cron_spec = cron_spec
+
+    def key(self) -> typing.Tuple[datetime.datetime, int]:
+        "Key to be used for merging cron invocations"
+        return self.dt, self.iid
+
+    def pr_str(self, runner: str) -> str:
+        "Convert to a string suitable for printing"
+        tm_str = self.dt.strftime('date=%Y-%m-%d time=%H:%M')
+        name = os.path.basename(self.cron_spec.path)
+        jid = self.cron_spec.cron_info['jid']
+        level = self.cron_spec.level()
+        cmd = self.cron_spec.cmd_str(runner)
+        return f'''# {tm_str} name={name} jid={jid} level={level}\n{cmd}'''

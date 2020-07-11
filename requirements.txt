@@ -12,7 +12,8 @@ certifi==2020.6.20        # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
 colorama==0.4.3           # via twine
-coverage==5.1             # via pytest-cov
+coverage==5.2             # via pytest-cov
+croniter==0.3.34          # via -r requirements.in
 cryptography==2.9.2       # via secretstorage
 docutils==0.16            # via readme-renderer
 idna==2.10                # via requests
@@ -23,6 +24,7 @@ keyring==21.2.1           # via twine
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
 more-itertools==8.4.0     # via pytest
+natsort==7.0.1            # via croniter
 packaging==20.4           # via bleach, pytest
 pkginfo==1.5.0.1          # via twine
 pluggy==0.13.1            # via pytest
@@ -34,12 +36,13 @@ pyparsing==2.4.7          # via packaging
 pytest-cov==2.10.0        # via -r requirements.in
 pytest-mock==3.1.1        # via -r requirements.in
 pytest==5.4.3             # via -r requirements.in, pytest-cov, pytest-mock
+python-dateutil==2.8.1    # via croniter
 readme-renderer==26.0     # via twine
 requests-toolbelt==0.9.1  # via twine
 requests==2.24.0          # via requests-toolbelt, twine
 rfc3986==1.4.0            # via twine
 secretstorage==3.1.2      # via keyring
-six==1.15.0               # via astroid, bleach, cryptography, packaging, readme-renderer
+six==1.15.0               # via astroid, bleach, cryptography, packaging, python-dateutil, readme-renderer
 toml==0.10.1              # via pylint
 tqdm==4.47.0              # via twine
 twine==3.2.0              # via -r requirements.in
