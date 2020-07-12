@@ -57,7 +57,7 @@ The above job shows two more features of the tagline:
 
   * We can put an integer between the double-colon to give a level
     number to the job.  The default level is 0.  This is useful in the
-    show-inv command described below.
+    list-inv command described below.
   * We can add parameters to the cron job, by adding it to the tagline
     after a "+" character.  The above job will be executed with two
     arguments "foo" and "bar".
