@@ -2,13 +2,14 @@
 
 import datetime
 import os
-import typing
+import sys
 
 import cronrepo
 
 
 def main() -> None:
-    import calf
+    "Main entry"
+    import calf  # pylint: disable=import-outside-toplevel
     calf.call(cronrepo_main)
 
 

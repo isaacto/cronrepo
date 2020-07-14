@@ -1,3 +1,5 @@
+"Setup script for cronrepo"
+
 import setuptools
 
 with open('README.md', 'r') as fh:
