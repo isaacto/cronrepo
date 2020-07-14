@@ -1,8 +1,11 @@
-calf
-croniter
+# Requirements for development
+mypy
+pylint
 pytest
 pytest-cov
-pylint
 pytest-mock
 twine
 wheel
+makefilemenu
+calf
+croniter
