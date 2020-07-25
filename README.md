@@ -76,7 +76,12 @@ job files.  This is done by the followings:
     install them as cron jobs.  Only jobs of the specific target is
     generated or installed.  If not specified, generate/install all
     jobs.  The job is started by a "cron runner" generated if you use
-    "install".
+    "install".  If the crontab already contains a previous
+    installation, they are updated.
+
+    One of the design objective is that it is possible to create a
+    cron job which updates the crontab.  This is done by a job which
+    calls this after updating the working directory.
 
   * Uninstallation
 
