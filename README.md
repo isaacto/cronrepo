@@ -130,3 +130,72 @@ adding `--trampoline "your_program"` when you run `cronrepo install`.
 The arguments to `your_program` is simply the path to the cron job
 file, followed by all the arguments to be passed to your job (as
 specified in `+ ...` in the cron job file).
+
+# The default trampoline: `cronrepo_run`
+
+If you do not want to code your own trampoline, the `cronrepo` system
+provides a default trampoline called `cronrepo_run`.  By default it
+simply exec the program specified.  But if the `cronrepo.rc` file
+exists, it looks for lines like the following to monitor the
+execution:
+
+  * `LOG=<CRONREPO_LOG>` (mandatory): Define the log
+    directory, which is used to contain three types of files:
+      * The standard output and error streams are redirected to the
+        file `<CRONREPO_LOG>/<CRONREPO_NAME>.log` (see below for the
+        definition of `<CRONREPO_NAME>`).  If the file already exists,
+        it is rotated.
+      * An empty file `<CRONREPO_LOG>/<CRONREPO_NAME>.running` is
+        created when the job starts running.  It is renamed to
+        `<CRONREPO_LOG>/<CRONREPO_NAME>.completed` or
+        `<CRONREPO_LOG>/<CRONREPO_NAME>.failed` depending on the
+        execution is successful or not.  This is for other scripts to
+        detect the current progress of the job.
+      * If the job fails, the file
+        `<CRONREPO_LOG>/<CRONREPO_NAME>.failed` contains a single
+        line containing the exit code, or the negated signal number if
+        negative.
+  * `NOTIFY=<notifier>` (optional): Invoke `<notifier>` if the command
+    failed.  The notifier is invoked through the shell, so that you
+    can have a notifier that performs output redirection, uses
+    `$CRONREPO_NAME`, etc.
+  * `ROTATE=<N>` (optional): Maximum number of backup files to keep
+    for the `<CRONREPO_LOG>/<CRONREPO_NAME>.log` files.
+
+`<CRONREPO_LOG>` is actually a `strftime` template: you can use `%Y`,
+`%m`, etc., to specify that the directory is dependent on the date
+(but not time, the time is always set to 00:00:00).  If the directory
+does not exist it is created.
+
+If the job does not have a job ID, `<CRONREPO_NAME>` is the name of the
+cron job file with last `.` and anything that follows is removed.  So
+if the cron job file is `job.sh`, the log file is `job.log`.  If the
+job has a job ID, the ID is appended before `.log`, separated from the
+cron job file name by `%`.  E.g., if the above job has job ID `home`,
+the log file would be `job%home.log`.
+
+When running the programs (both the cron file and the notifier), some
+environment variables are defined:
+
+  * `CRONREPO_LOG`: as defined above.
+  * `CRONREPO_NAME` as defined above.
+  * `CRONREPO_DATE`: the date that defines `CRONREPO_LOG`, in %Y-%m-%d format.
+
+If `cronrepo_run` itself have errors, it is written to the standard
+error stream.  If the job runs from cron, it normally end up in the
+mailbox.  Before installing the job, it is a good idea to test the job
+by running it from console.  As a reminder, the job ID can be defined
+with the `CRONREPO_JID` variable.
+
+The trampoline `cronrepo_run` is written so that it ignores the
+signals SIGINT, SIGQUIT, SIGTERM and SIGPIPE.  This is to allow users
+to run the program interactively, and do things like pressing
+Control-C, pressing Control-\ and exiting the terminal.  Such actions
+affect the program it runs, without causing `cronrepo_run` to stop and
+skip logging.  Of course if you send a SIGKILL to it, all bets are
+off.
+
+At times you want to run `cronrepo_run` interactively, without causing
+the notifier program to be invoked even if the program fails.  To do
+this, you can add a `-d` option right after `cronrepo_run`, like
+`cronrepo_run -d <crondir>/<cronfile> ...`.

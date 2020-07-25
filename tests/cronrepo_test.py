@@ -154,6 +154,6 @@ def test_crondir_list_inv(sample_crondir: str) -> None:
     invs = list(crondir.list_inv(datetime.datetime(2020, 7, 10),
                                  datetime.datetime(2020, 7, 13), 0))
     assert len(invs) == 1
-    assert invs[0].pr_str('runner') == f'''
+    assert invs[0].pr_str('runner') == '''
 # date=2020-07-10 time=18:02 name=foo jid= level=0
-runner t1 '' {sample_crondir}/foo'''.lstrip('\n')
+runner t1 '' %s/foo'''.lstrip('\n') % (sample_crondir,)

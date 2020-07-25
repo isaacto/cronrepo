@@ -2,20 +2,116 @@
 
 import datetime
 import os
+import re
+import signal
+import subprocess
 import sys
+import typing
 
 import cronrepo
 
 
-def main() -> None:
-    "Main entry"
+def cronrepo_mgr() -> None:
+    "Main entry of the manager"
     import calf  # pylint: disable=import-outside-toplevel
-    calf.call(cronrepo_main)
+    calf.call(mgr)
 
 
-def cronrepo_main(action: str, crondir: str, *, target: str = '',
-                  trampoline: str = '', minlevel: int = 0,
-                  start: str = '', end: str = '') -> None:
+class RunParam:
+    "Parameters found by cronrepo_run"
+    def __init__(self) -> None:
+        self.name = ''
+        self.logdir = ''
+        self.notifier = None  # type: typing.Optional[str]
+        self.rotate = 0
+
+    @classmethod
+    def get(cls, cron_file: str, cronrepo_rc: str) -> 'RunParam':
+        ret = cls()
+        name, sep, suf = os.path.basename(cron_file).rpartition('.')
+        ret.name = name if sep else suf
+        if os.environ.get('CRONREPO_JID'):
+            ret.name += '%' + os.environ["CRONREPO_JID"]
+        os.environ['CRONREPO_NAME'] = ret.name
+        run_date = datetime.date.today()
+        os.environ['CRONREPO_DATE'] = run_date.strftime('%Y-%m-%d')
+        with open(cronrepo_rc) as fin:
+            for line in fin:
+                key, sep, val = line.rstrip('\n').partition('=')
+                if key == 'CRONREPO_LOG':
+                    os.environ['CRONREPO_LOG'] \
+                        = ret.logdir = run_date.strftime(val)
+                elif key == 'NOTIFIER':
+                    ret.notifier = val
+                elif key == 'ROTATE':
+                    ret.rotate = int(val)
+        assert ret.logdir, 'Log dir must be defined'
+        return ret
+
+
+IGNORED_SIGS = (signal.SIGINT, signal.SIGQUIT, signal.SIGTERM, signal.SIGPIPE)
+"Signals to ignore when monitoring"
+
+
+def cronrepo_run() -> None:
+    "Main entry of the default trampoline"
+    args = sys.argv[1:]
+    debug = False
+    if args[0] == '-d':
+        debug = True
+        del args[0]
+    cronrepo_rc = os.path.join(os.path.dirname(args[0]), 'cronrepo.rc')
+    if not os.path.exists(cronrepo_rc):
+        for sig in (signal.SIGPIPE, signal.SIGXFSZ):
+            signal.signal(sig, signal.SIG_DFL)
+        os.execl(args[0], *args)
+    param = RunParam.get(args[0], cronrepo_rc)
+    for sig in IGNORED_SIGS:
+        signal.signal(sig, signal.SIG_IGN)
+    os.makedirs(param.logdir, exist_ok=True)
+    logbase = os.path.join(param.logdir, param.name)
+    logname = logbase + '.log'
+    _logrotate(logname, 0, param.rotate)
+    for suffix in ('.completed', '.failed'):
+        try:
+            os.remove(logbase + suffix)
+        except OSError:
+            pass
+    with open(logbase + '.running', 'w'):
+        pass
+    with open(logname, 'wt') as outfd:
+        res = subprocess.run(args, stdout=outfd, stderr=subprocess.STDOUT,
+                             preexec_fn=_unignore_signals)
+    if res.returncode == 0:
+        os.rename(logbase + '.running', logbase + '.completed')
+    else:
+        os.rename(logbase + '.running', logbase + '.failed')
+        with open(logbase + '.failed', 'wt') as fout:
+            print(str(res.returncode), file=fout)
+        if param.notifier:
+            subprocess.run(param.notifier, shell=True)
+
+
+def _logrotate(base: str, cnt: int, limit: int) -> None:
+    logname = _logname(base, cnt)
+    if cnt >= limit or not os.path.exists(logname):
+        return
+    _logrotate(base, cnt + 1, limit)
+    os.rename(logname, _logname(base, cnt + 1))
+
+
+def _logname(base: str, cnt: int) -> str:
+    return '%s.%d' % (base, cnt) if cnt else base
+
+
+def _unignore_signals() -> None:
+    for sig in IGNORED_SIGS:
+        signal.signal(sig, signal.SIG_DFL)
+
+
+def mgr(action: str, crondir: str, *, target: str = '',
+        trampoline: str = 'cronrepo_run', minlevel: int = 0,
+        start: str = '', end: str = '') -> None:
     """Operate on a cronrepo
 
     Args:
@@ -56,26 +152,26 @@ def cronrepo_main(action: str, crondir: str, *, target: str = '',
             listed.
 
     """
-    crondir = cronrepo.CronDir(os.path.realpath(crondir), target)
+    crondir_obj = cronrepo.CronDir(os.path.realpath(crondir), target)
     if action == 'generate':
-        print(crondir.generate(), end='')
+        print(crondir_obj.generate(), end='')
     elif action == 'install':
-        crondir.install(trampoline)
+        crondir_obj.install(trampoline)
     elif action == 'uninstall':
-        crondir.uninstall()
+        crondir_obj.uninstall()
     elif action == 'list-inv':
         if start == '':
-            start = datetime.datetime.now().replace(second=0, microsecond=0)
+            sdt = datetime.datetime.now().replace(second=0, microsecond=0)
         else:
-            start = _get_dt(start)
+            sdt = _get_dt(start)
         if end == '':
-            end = start + datetime.timedelta(hours=23, minutes=59)
+            edt = sdt + datetime.timedelta(hours=23, minutes=59)
         else:
-            end = _get_dt(end)
-        for cron_inv in crondir.list_inv(start, end, minlevel):
-            print(cron_inv.pr_str(crondir.runner_path()))
+            edt = _get_dt(end)
+        for cron_inv in crondir_obj.list_inv(sdt, edt, minlevel):
+            print(cron_inv.pr_str(crondir_obj.runner_path()))
     else:
-        print(f'Unknown action {action}', file=sys.stderr)
+        print('Unknown action ' + action, file=sys.stderr)
 
 
 def _get_dt(dt_str: str) -> datetime.datetime:
@@ -83,4 +179,4 @@ def _get_dt(dt_str: str) -> datetime.datetime:
 
 
 if __name__ == '__main__':
-    main()
+    cronrepo_mgr()

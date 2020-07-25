@@ -21,7 +21,8 @@ setuptools.setup(
     ],
     entry_points={
         "console_scripts": [
-            "cronrepo=cronrepo.__main__:main",
+            "cronrepo=cronrepo.__main__:cronrepo_mgr",
+            "cronrepo_run=cronrepo.__main__:cronrepo_run",
         ]
     },
     classifiers=[
