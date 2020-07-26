@@ -88,7 +88,7 @@ def cronrepo_run() -> None:
         os.rename(logbase + '.running', logbase + '.failed')
         with open(logbase + '.failed', 'wt') as fout:
             print(str(res.returncode), file=fout)
-        if param.notifier:
+        if param.notifier and not debug:
             subprocess.run(param.notifier, shell=True)
 
 

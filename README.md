@@ -167,8 +167,8 @@ execution:
 (but not time, the time is always set to 00:00:00).  If the directory
 does not exist it is created.
 
-If the job does not have a job ID, `<CRONREPO_NAME>` is the name of the
-cron job file with last `.` and anything that follows is removed.  So
+If the job does not have a job ID, `<CRONREPO_NAME>` is the name of
+the cron job file with last `.` and anything that follows removed.  So
 if the cron job file is `job.sh`, the log file is `job.log`.  If the
 job has a job ID, the ID is appended before `.log`, separated from the
 cron job file name by `%`.  E.g., if the above job has job ID `home`,
