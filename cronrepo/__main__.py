@@ -39,8 +39,10 @@ class RunParam:
             for line in fin:
                 key, sep, val = line.rstrip('\n').partition('=')
                 if key == 'CRONREPO_LOG':
-                    os.environ['CRONREPO_LOG'] \
-                        = ret.logdir = run_date.strftime(val)
+                    logdir = run_date.strftime(val)
+                    logdir = os.path.expandvars(logdir)
+                    logdir = os.path.expanduser(logdir)
+                    os.environ['CRONREPO_LOG'] = ret.logdir = logdir
                 elif key == 'NOTIFIER':
                     ret.notifier = val
                 elif key == 'ROTATE':

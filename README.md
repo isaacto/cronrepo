@@ -164,7 +164,8 @@ execution:
 
 `<CRONREPO_LOG>` is actually a `strftime` template: you can use `%Y`,
 `%m`, etc., to specify that the directory is dependent on the date
-(but not time, the time is always set to 00:00:00).  If the directory
+(but not time, the time is always set to 00:00:00).  Environment
+variables and user directories are also expanded.  If the directory
 does not exist it is created.
 
 If the job does not have a job ID, `<CRONREPO_NAME>` is the name of
