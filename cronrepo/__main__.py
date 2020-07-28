@@ -33,8 +33,12 @@ class RunParam:
         if os.environ.get('CRONREPO_JID'):
             ret.name += '%' + os.environ["CRONREPO_JID"]
         os.environ['CRONREPO_NAME'] = ret.name
-        run_date = datetime.date.today()
-        os.environ['CRONREPO_DATE'] = run_date.strftime('%Y-%m-%d')
+        if 'CRONREPO_DATE' not in os.environ:
+            run_date = datetime.date.today()
+            os.environ['CRONREPO_DATE'] = run_date.strftime('%Y-%m-%d')
+        else:
+            run_date = datetime.datetime.strptime(
+                os.environ['CRONREPO_DATE'], '%Y-%m-%d').date()
         with open(cronrepo_rc) as fin:
             for line in fin:
                 key, sep, val = line.rstrip('\n').partition('=')
