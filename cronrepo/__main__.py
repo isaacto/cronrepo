@@ -90,8 +90,12 @@ def cronrepo_run() -> None:
         os.rename(logbase + '.running', logbase + '.failed')
         with open(logbase + '.failed', 'wt') as fout:
             print(str(res.returncode), file=fout)
-        if param.notifier and not debug:
-            subprocess.run(param.notifier, shell=True)
+        if param.notifier:
+            if debug:
+                print('Exit code:', res.returncode, file=sys.stderr)
+                exit(res.returncode)
+            else:
+                subprocess.run(param.notifier, shell=True)
 
 
 def _logrotate(base: str, cnt: int, limit: int) -> None:

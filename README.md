@@ -199,4 +199,6 @@ off.
 At times you want to run `cronrepo_run` interactively, without causing
 the notifier program to be invoked even if the program fails.  To do
 this, you can add a `-d` option right after `cronrepo_run`, like
-`cronrepo_run -d <crondir>/<cronfile> ...`.
+`cronrepo_run -d <crondir>/<cronfile> ...`.  In case of errors, the
+exit code is printed and becomes the exit code of the program itself,
+but the notifier is not invoked.
