@@ -97,9 +97,9 @@ def cronrepo_run() -> None:
         if param.notifier:
             if debug:
                 print('Exit code:', res.returncode, file=sys.stderr)
-                exit(res.returncode)
             else:
-                subprocess.run(param.notifier, shell=True)
+                subprocess.run(param.notifier, shell=True, check=False)
+    exit(res.returncode)
 
 
 def _logrotate(base: str, cnt: int, limit: int) -> None:
