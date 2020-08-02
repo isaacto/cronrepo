@@ -1,24 +1,23 @@
-# cronrepo: Maintain a set of cron jobs in your code repository.
+# cronrepo: Maintain a set of cron jobs in your code repository
 
 In Unix conventions, periodic tasks are invoked by cron jobs.  These
-jobs are normally configured by the user interactively.  When building
-a complex system that contains code that needs to be executed
-periodically, one usually needs to configure many related cron jobs
-and to ensure that they are installed exactly at the moment when the
-repository gets deployed.  This is cumbersome and error-prone.
+jobs are normally configured by the users interactively.  When
+building a complex system, one usually needs to configure many related
+cron jobs and to ensure that they are installed when the repository
+gets deployed.  This is cumbersome and error-prone.
 
 The cronrepo system eases that pain.
 
 ## Cron job files
 
 A directory should be created for the cron job files.  They are
-normally shell scripts, although you can use other type of programs as
-well.  They need to be line-based, and need to allow a comment style
-headed by "#" (or otherwise allowing such lines to be inserted freely,
-e.g., through a multi-line string syntax).  So using Perl or Python
-scripts or even Makefile as such jobs are okay.
+normally shell scripts, although you can use other types of programs
+as well.  They need to be line-based, and need to allow a comment
+style headed by "#" (or otherwise allowing such lines to be inserted
+freely, e.g., through a multi-line string syntax).  So using Perl or
+Python scripts or even Makefile as such jobs are okay.
 
-The cron job files will be tagged by "taglines" to tell what cron jobs
+The cron job files are tagged by "taglines" to tell what cron jobs
 should be installed on each target.  The simplest ones look like this:
 
     # CRON@alice::1-10/2 05 01-07 * 2,4
@@ -43,15 +42,15 @@ jobs are installed on the system, one target is installed at a time.
 This allows you to have a cron directory containing jobs that runs
 differently on different targets, e.g., different machines.
 
-Multiple taglines may be created for the same target.  It is at times
-handy to be able to differentiate them.  We can add a "job ID" to the
-above line, like this:
+Multiple taglines may be created for the same target, in the same job
+file.  It is at times handy to be able to differentiate them.  We can
+add a "job ID" to the above line, like this:
 
     # CRON@alice%second:5:11-20/2 05 01-07 * 2,4 + foo bar
 
 The job ID consists of word characters (letters, digits and
 underscores).  The job ID is set as the environment variable
-CRONREPO_JID.
+CRONREPO_JID during the execution of the job.
 
 The above job shows two more features of the tagline:
 
@@ -73,13 +72,13 @@ job files.  This is done by the followings:
         # cronrepo install <dir> --target <target>
 
     Generate cron jobs entries and show it on the command line or
-    install them as cron jobs.  Only jobs of the specific target is
+    install them as cron jobs.  Only jobs of the specific target are
     generated or installed.  If not specified, generate/install all
     jobs.  The job is started by a "cron runner" generated if you use
     "install".  If the crontab already contains a previous
     installation, they are updated.
 
-    One of the design objective is that it is possible to create a
+    One of the design objectives is that it is possible to create a
     cron job which updates the crontab.  This is done by a job which
     calls this after updating the working directory.
 
@@ -104,13 +103,15 @@ job files.  This is done by the followings:
 
 # The cron runner
 
-If you ever written a cron job you know that the environment as seen
+If you ever written a cron job, you know that the environment as seen
 by the cron job is quite different from your normal environment: PATH
 is very simplistic (usually so simplistic that you end up setting up
-your PATH in your script as the first step).  In cronrepo this is done
-for you.
+your PATH in your script as the first step), all the environment
+variables set in your shell init script are not present, etc.  To make
+it easier to use, cronrepo creates an environment before running the
+cron job files.
 
-In particular, when you use "cronrepo install", a "runner script" is
+More precisely, when you use `cronrepo install`, a "runner script" is
 created.  All current environment variables (except a few) are
 converted into variable exporting commands in the runner script, and
 the current directory is also set in the script.  So at the end, the
@@ -119,17 +120,17 @@ job on the command line of your terminal running "cronrepo install".
 
 # The trampoline
 
-Normally, if a cron jobs fails or emit output, notification will be
-sent to the owner of the cron job via E-mail.  You can globally
-disable this feature, but having nobody to take care of cron job
-failures is not a good idea.
+Normally, if a cron job emits output, notification will be sent to the
+owner of the cron job via E-mail.  You can globally disable this
+feature (by setting variables in the crontab), but having nobody to
+take care of cron job failures is not a good idea.
 
-You can write a program to actually run your cron jobs, and have the
-runner file to run that instead of the cron job.  This is done by
-adding `--trampoline "your_program"` when you run `cronrepo install`.
-The arguments to `your_program` is simply the path to the cron job
-file, followed by all the arguments to be passed to your job (as
-specified in `+ ...` in the cron job file).
+You can write a program to be run by the runner to actually run your
+cron jobs, and have the runner file to run that instead of the cron
+job.  This is done by adding `--trampoline "your_program"` when you
+run `cronrepo install`.  The arguments to `your_program` is simply the
+path to the cron job file, followed by all the arguments to be passed
+to your job (as specified in `+ ...` in the cron job file).
 
 # The default trampoline: `cronrepo_run`
 
@@ -182,11 +183,11 @@ environment variables are defined:
   * `CRONREPO_NAME` as defined above.
   * `CRONREPO_DATE`: the date that defines `CRONREPO_LOG`, in %Y-%m-%d format.
 
-If `cronrepo_run` itself have errors, it is written to the standard
-error stream.  If the job runs from cron, it normally end up in the
+If `cronrepo_run` itself has an error, it is written to the standard
+error stream.  If the job runs from cron, it normally ends up in the
 mailbox.  Before installing the job, it is a good idea to test the job
-by running it from console.  As a reminder, the job ID can be defined
-with the `CRONREPO_JID` variable.
+by running it from the console.  As a reminder, the job ID can be
+defined with the `CRONREPO_JID` variable.
 
 The trampoline `cronrepo_run` is written so that it ignores the
 signals SIGINT, SIGQUIT, SIGTERM and SIGPIPE.  This is to allow users
