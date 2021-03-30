@@ -4,59 +4,127 @@
 #
 #    pip-compile
 #
-astroid==2.4.2            # via pylint
-attrs==19.3.0             # via makefilemenu, pytest
-bleach==3.1.5             # via readme-renderer
-calf==0.3.2               # via -r requirements.in, makefilemenu
-certifi==2020.6.20        # via requests
-cffi==1.14.0              # via cryptography
-chardet==3.0.4            # via requests
-colorama==0.4.3           # via twine
-coverage==5.2             # via pytest-cov
-croniter==0.3.34          # via -r requirements.in
-cryptography==2.9.2       # via secretstorage
-docutils==0.16            # via readme-renderer
-idna==2.10                # via requests
-importlib-metadata==1.7.0  # via keyring, pluggy, pytest, twine
-isort==4.3.21             # via pylint
-jeepney==0.4.3            # via keyring, secretstorage
-keyring==21.2.1           # via twine
-lazy-object-proxy==1.4.3  # via astroid
-makefilemenu==0.3.1       # via -r requirements.in
-mccabe==0.6.1             # via pylint
-more-itertools==8.4.0     # via pytest
-mypy-extensions==0.4.3    # via mypy
-mypy==0.782               # via -r requirements.in
-natsort==7.0.1            # via croniter
-packaging==20.4           # via bleach, pytest
-pkginfo==1.5.0.1          # via twine
-pluggy==0.13.1            # via pytest
-py==1.9.0                 # via pytest
-pycparser==2.20           # via cffi
-pygments==2.6.1           # via readme-renderer
-pylint==2.5.3             # via -r requirements.in
-pyparsing==2.4.7          # via packaging
-pytest-cov==2.10.0        # via -r requirements.in
-pytest-mock==3.2.0        # via -r requirements.in
-pytest==5.4.3             # via -r requirements.in, pytest-cov, pytest-mock
-python-dateutil==2.8.1    # via croniter
-readme-renderer==26.0     # via twine
-requests-toolbelt==0.9.1  # via twine
-requests==2.24.0          # via requests-toolbelt, twine
-rfc3986==1.4.0            # via twine
-secretstorage==3.1.2      # via keyring
-six==1.15.0               # via astroid, bleach, cryptography, packaging, python-dateutil, readme-renderer
-toml==0.10.1              # via pylint
-tqdm==4.47.0              # via twine
-twine==3.2.0              # via -r requirements.in
-typed-ast==1.4.1          # via astroid, mypy
-typing-extensions==3.7.4.2  # via mypy
-urllib3==1.25.9           # via requests
-wcwidth==0.2.5            # via pytest
-webencodings==0.5.1       # via bleach
-wheel==0.34.2             # via -r requirements.in
-wrapt==1.12.1             # via astroid
-zipp==3.1.0               # via importlib-metadata
+astroid==2.4.2
+    # via pylint
+attrs==19.3.0
+    # via
+    #   makefilemenu
+    #   pytest
+bleach==3.1.5
+    # via readme-renderer
+calf==0.3.2
+    # via
+    #   -r requirements.in
+    #   makefilemenu
+certifi==2020.6.20
+    # via requests
+cffi==1.14.0
+    # via cryptography
+chardet==3.0.4
+    # via requests
+colorama==0.4.3
+    # via twine
+coverage==5.2
+    # via pytest-cov
+croniter==0.3.34
+    # via -r requirements.in
+cryptography==2.9.2
+    # via secretstorage
+docutils==0.16
+    # via readme-renderer
+idna==2.10
+    # via requests
+isort==4.3.21
+    # via pylint
+jeepney==0.4.3
+    # via
+    #   keyring
+    #   secretstorage
+keyring==21.2.1
+    # via twine
+lazy-object-proxy==1.4.3
+    # via astroid
+makefilemenu==0.3.1
+    # via -r requirements.in
+mccabe==0.6.1
+    # via pylint
+more-itertools==8.4.0
+    # via pytest
+mypy-extensions==0.4.3
+    # via mypy
+mypy==0.782
+    # via -r requirements.in
+natsort==7.0.1
+    # via croniter
+packaging==20.4
+    # via
+    #   bleach
+    #   pytest
+pkginfo==1.5.0.1
+    # via twine
+pluggy==0.13.1
+    # via pytest
+py==1.9.0
+    # via pytest
+pycparser==2.20
+    # via cffi
+pygments==2.7.4
+    # via readme-renderer
+pylint==2.5.3
+    # via -r requirements.in
+pyparsing==2.4.7
+    # via packaging
+pytest-cov==2.10.0
+    # via -r requirements.in
+pytest-mock==3.2.0
+    # via -r requirements.in
+pytest==5.4.3
+    # via
+    #   -r requirements.in
+    #   pytest-cov
+    #   pytest-mock
+python-dateutil==2.8.1
+    # via croniter
+readme-renderer==26.0
+    # via twine
+requests-toolbelt==0.9.1
+    # via twine
+requests==2.24.0
+    # via
+    #   requests-toolbelt
+    #   twine
+rfc3986==1.4.0
+    # via twine
+secretstorage==3.1.2
+    # via keyring
+six==1.15.0
+    # via
+    #   astroid
+    #   bleach
+    #   cryptography
+    #   packaging
+    #   python-dateutil
+    #   readme-renderer
+toml==0.10.1
+    # via pylint
+tqdm==4.47.0
+    # via twine
+twine==3.2.0
+    # via -r requirements.in
+typed-ast==1.4.1
+    # via mypy
+typing-extensions==3.7.4.2
+    # via mypy
+urllib3==1.25.9
+    # via requests
+wcwidth==0.2.5
+    # via pytest
+webencodings==0.5.1
+    # via bleach
+wheel==0.34.2
+    # via -r requirements.in
+wrapt==1.12.1
+    # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
