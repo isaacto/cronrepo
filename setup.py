@@ -7,7 +7,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='cronrepo',
-    version='0.3.3',
+    version='0.3.4',
     author='Isaac To',
     author_email='isaac.to@gmail.com',
     description='Maintain a set of cron jobs in your code repository',
