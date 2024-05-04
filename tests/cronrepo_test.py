@@ -93,7 +93,7 @@ def test_crondir_runner(sample_crondir: str) -> None:
 
 
 def test_crondir_stripped_crontab(
-        sample_crondir: str, mocker: pytest_mock.plugin.MockFixture) -> None:
+        sample_crondir: str, mocker: pytest_mock.MockFixture) -> None:
     crondir = cronrepo.CronDir(sample_crondir, 't1')
     mocker.patch('subprocess.run')
     proc_obj = subprocess.run.return_value = mocker.Mock()
@@ -107,8 +107,7 @@ def test_crondir_stripped_crontab(
     assert crondir.stripped_crontab() == '# hello\n# world\n'
 
 
-def test_crondir_install_crontab(
-        mocker: pytest_mock.plugin.MockFixture) -> None:
+def test_crondir_install_crontab(mocker: pytest_mock.MockFixture) -> None:
     mocker.patch('subprocess.run')
     cronrepo.install_crontab('# hello\n')
     subprocess.run.assert_called_once_with(
@@ -116,7 +115,7 @@ def test_crondir_install_crontab(
 
 
 def test_crondir_install(
-        sample_crondir: str, mocker: pytest_mock.plugin.MockFixture) -> None:
+        sample_crondir: str, mocker: pytest_mock.MockFixture) -> None:
     mocker.patch('cronrepo.install_crontab')
     mocker.patch('cronrepo.CronDir.stripped_crontab')
     crondir = cronrepo.CronDir(sample_crondir, 't1')
@@ -140,7 +139,7 @@ def test_crondir_install(
 
 
 def test_crondir_uninstall(
-        sample_crondir: str, mocker: pytest_mock.plugin.MockFixture) -> None:
+        sample_crondir: str, mocker: pytest_mock.MockFixture) -> None:
     mocker.patch('cronrepo.install_crontab')
     mocker.patch('cronrepo.CronDir.stripped_crontab')
     crondir = cronrepo.CronDir(sample_crondir, 't1')
