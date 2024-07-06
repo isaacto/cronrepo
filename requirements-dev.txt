@@ -14,7 +14,7 @@ calf==0.3.3
     # via
     #   -r requirements-dev.in
     #   makefilemenu
-certifi==2024.2.2
+certifi==2024.7.4
     # via requests
 cffi==1.16.0
     # via cryptography
