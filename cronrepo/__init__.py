@@ -236,7 +236,8 @@ class CronDir:
         with open(runner, 'wt') as fout:
             print('#!/bin/bash', file=fout)
             for key, value in sorted(os.environ.items()):
-                if key in self.SKIPPED_ENVVAR or key.startswith('CRONREPO_'):
+                if (key in self.SKIPPED_ENVVAR or key.startswith('CRONREPO_')
+                        or '(' in key):
                     continue
                 print('export ' + key + '=' + shlex.quote(value), file=fout)
             print('cd ' + shlex.quote(os.getcwd()), file=fout)
