@@ -67,6 +67,7 @@ def cronrepo_run() -> None:
         debug = True
         del args[0]
     cronrepo_rc = os.path.join(os.path.dirname(args[0]), 'cronrepo.rc')
+    sig: int
     if not os.path.exists(cronrepo_rc):
         for sig in (signal.SIGPIPE, signal.SIGXFSZ):
             signal.signal(sig, signal.SIG_DFL)
