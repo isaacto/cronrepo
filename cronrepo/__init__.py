@@ -12,6 +12,9 @@ import typing
 import croniter
 
 
+__version__ = '0.3.5'
+
+
 class CronSpec:
     """Represent a cron specification line in a cron job file
 
