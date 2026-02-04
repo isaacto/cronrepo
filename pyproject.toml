@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">= 3.9"
 dependencies = [
     "calf",
-    "croniter",
+    "cronsim",
 ]
 authors = [
     { name="Isaac To", email="isaac.to@gmail.com" },
