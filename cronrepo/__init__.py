@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import typing
 
-import croniter
+import cronsim
 
 
 __version__ = '0.4'
@@ -147,9 +147,9 @@ class CronSpec:
             iid: The invocation ID of the invocations to generate
 
         """
-        itr = croniter.croniter(self.cron_fmt(), start)
+        itr = cronsim.CronSim(self.cron_fmt(), start)
         while True:
-            idt = itr.get_next(ret_type=datetime.datetime)
+            idt = next(itr)
             yield CronInv(idt, iid, self)
 
     def level(self) -> int:
