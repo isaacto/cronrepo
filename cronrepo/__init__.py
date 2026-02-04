@@ -12,7 +12,7 @@ import typing
 import cronsim
 
 
-__version__ = '0.5'
+__version__ = '0.5.1'
 
 
 class CronSpec:
